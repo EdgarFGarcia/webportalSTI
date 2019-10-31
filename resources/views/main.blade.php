@@ -1,0 +1,392 @@
+@extends('welcome')
+
+@section('content')
+    <!-- admin -->
+    @if(Auth::User()->roles_id == 1)
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Dashboard Admin</h1>
+        </div>
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Registered Users (Verified)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="registeredCount"></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4" id="registerdUserNotVerified">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Registered Users (Not Verified)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="registeredCount2"></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4" id="pendingRequestsDiv">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Pending Requests</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingCount"></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Posted Announcement</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="postedRequestCount"></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <label for="announcement">Make an announcement</label><br/>
+                <textarea id="announcement" class="form-control"></textarea>
+                <button type="button" id="sendAnnouncement" class="btn btn-primary float-right">Send</button>
+            </div>
+        </div>
+        
+        @include('modals.pendingRequestModal')
+        @include('modals.userNotVerified')
+        @include('modals.registeredCount')
+        @include('modals.editUser')
+        <!-- faculty -->
+
+    @elseif(Auth::User()->roles_id == 2) 
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Dashboard Faculty</h1>
+        </div>
+        <div class="col-md-12">
+            <label for="announcementFaculty">Make an announcement</label><br/>
+            <textarea id="announcementFaculty" class="form-control"></textarea>
+            <button type="button" id="sendAnnouncementFaculty" class="btn btn-primary float-right">Send</button>
+        </div>
+    <!-- student -->
+    @elseif(Auth::User()->roles_id == 3)
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Dashboard Students</h1>
+        </div>
+        <div class="col-md-12">
+            <table class="table table-sm table-condensed table-striped" id="tableStudents">
+                <thead>
+                    <tr>
+                        <th>Message</th>
+                        <th>Posted By</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    @endif
+@endsection
+
+@section('script')
+    <script>
+
+        var registerdUserNotVerifiedTable = $('#registerdUserNotVerifiedTable').DataTable();
+        var registeredCountTable = $('#registeredCountTable').DataTable();
+        var pendingRequestsTable = $('#pendingRequestsTable').DataTable();
+        var tableStudents = $('#tableStudents').DataTable();
+
+        $(document).ready(function(){
+            // start admin
+            getRegisteredCount();
+            getRegisteredCountNonVerified();
+            pendingRequestCount();
+            postedRequestCount();
+
+            $(document).on('click', '#pendingRequestsDiv', function(){
+                getPendingRequests();
+            });
+
+            $(document).on('click', '#sendAnnouncement', function(){
+                sendAnnouncement();
+            });
+
+            $(document).on('click', '#registerdUserNotVerified', function(){
+                registerdUserNotVerified();
+            });
+
+            $(document).on('click', '#registeredCount', function(){
+                registeredCountTableCallBack();
+            });
+
+            $('#registerdUserNotVerifiedTable tbody').on('click', 'tr', function(){
+                var data = registerdUserNotVerifiedTable.row(this).data();
+                var id = data['userId'];
+                validateUser(id);
+            });
+
+            $('#pendingRequestsTable tbody').on('click', 'tr', function(){
+                var data = pendingRequestsTable.row(this).data();
+                var id = data['id'];
+                sendNotification(id);
+            });
+
+            $('#registeredCountTable tbody').on('click', 'tr', function(){
+                var data = registeredCountTable.row(this).data();
+                var id = data['userId'];
+                editUser(id);
+            });
+
+
+
+            $(document).on('click', '#saveEditUser', function(){
+                saveEditedUser();
+            });
+
+            // end admin
+
+            // start faculty
+            $(document).on('click', '#sendAnnouncementFaculty', function(){
+                requestNotification();
+            });
+            // end faculty
+
+            // start student
+            tableStudentsLoad();
+            // end student
+        });
+        // start admin
+        function getRegisteredCount(){
+            $.ajax({
+                url : "{{ url('api/getHeadCount') }}",
+                method : "GET",
+                dataType : "JSON"
+            }).done(function(response){
+                $('#registeredCount').append(response);
+            });
+        }
+        function getRegisteredCountNonVerified(){
+            $.ajax({
+                url : "{{ url('api/getHeadCountNonVerified') }}",
+                method : "GET",
+                dataType : "JSON"
+            }).done(function(response){
+                $('#registeredCount2').text('');
+                $('#registeredCount2').append(response);
+            });
+        }
+        function pendingRequestCount(){
+            $.ajax({
+                url : "{{ url('api/pendingRequestCount') }}",
+                method : "GET",
+                dataType : "JSON"
+            }).done(function(response){
+                $('#pendingCount').append(response);
+            });
+        }
+        function postedRequestCount(){
+            $.ajax({
+                url : "{{ url('api/postedRequestCount') }}",
+                method : "GET",
+                dataType : "JSON"
+            }).done(function(response){
+                $('#postedRequestCount').text('');
+                $('#postedRequestCount').append(response);
+            });
+        }
+
+        function sendAnnouncement(){
+            var announcement = $('#announcement').val();
+            $.ajax({
+                url : "{{ url('api/sendAnnouncement') }}",
+                method : "POST",
+                dataType : "JSON",
+                data : {
+                    announcement : announcement
+                }
+            }).done(function(response){
+
+            });
+        }
+
+        function getPendingRequests(){
+            $('#pendingRequestModal').modal("show");
+            pendingRequestsTable = $('#pendingRequestsTable').DataTable().destroy();
+            pendingRequestsTable = $('#pendingRequestsTable').DataTable({
+                "ajax": {
+                    url: "{{ url('api/getPendingRequests') }}",
+                    method : "GET"
+                },
+                "columns": [
+                    {"data": "message"},
+                    {"data": "fullname"}
+                ]
+            });
+        }
+
+        function registerdUserNotVerified(){
+            $('#registerdUserNotVerifiedModal').modal("show");
+            registerdUserNotVerifiedTable = $('#registerdUserNotVerifiedTable').DataTable().destroy();
+            registerdUserNotVerifiedTable = $('#registerdUserNotVerifiedTable').DataTable({
+                "ajax": {
+                    url: "{{ url('api/registerdUserNotVerified') }}",
+                    method: "GET"
+                },
+                "columns" : [
+                    {data : "fullname", name: "fullname"},
+                    {data : "username", name: "username"},
+                    {data : "email", name: "email"},
+                    {data : "role", name: "role"}
+                ]
+            });
+        }
+
+        function validateUser(userId){
+            $.ajax({
+                url : "{{ url('api/validateUser') }}",
+                method : "POST",
+                data : {
+                    id: userId
+                }
+            }).done(function(response){
+                $('#registerdUserNotVerifiedTable').DataTable().ajax.reload();
+                getRegisteredCountNonVerified();
+            });
+        }
+
+        function registeredCountTableCallBack(){
+            $('#registeredCountModal').modal("show");
+            registeredCountTable = $('#registeredCountTable').DataTable().destroy();
+            registeredCountTable = $('#registeredCountTable').DataTable({
+                "ajax": {
+                    url : "{{ url('api/registeredCountGet') }}",
+                    method : "GET"
+                },
+                "columns": [
+                    {data : "fullname", name: "fullname"},
+                    {data : "username", name: "username"},
+                    {data : "email", name: "email"},
+                    {data : "role", name: "role"}
+                ]
+            });
+        }
+
+        function editUser(userId){
+            $.ajax({
+                url : "{{ url('api/editUser') }}",
+                method : "GET",
+                dataType : "JSON",
+                data : {
+                    id : userId
+                }
+            }).done(function(response){
+                if(response.success){
+                    toastr.success("Please wait...");
+                    $('#email').val(response.query[0].email);
+                    $('#mobilenumber').val(response.query[0].number);
+                    $('#userId').val(response.query[0].id);
+                    $('#roles').find('option').remove().end();
+                    $.each(response.roles, function(key, value){
+                        $('#roles').append($("<option></option")
+                                .attr("value", value.id)
+                                .text(value.name)
+                            );
+                    });
+                    $('#editUserModal').modal("show");
+                }
+            });
+        }
+
+        function saveEditedUser(){
+            var email = $('#email').val();
+            var mobilenumber= $('#mobilenumber').val();
+            var roles = $('#roles').val();
+            var id = $('#userId').val();
+            $.ajax({
+                url : "{{ url('api/saveEditedUser') }}",
+                method : "POST",
+                data : {
+                    email : email,
+                    mobilenumber : mobilenumber,
+                    roles : roles,
+                    id : id
+                }
+            }).done(function(response){
+                if(response.success){
+                    toastr.success(response.message);
+                    $('#editUserModal').modal("hide");
+                }else{
+                    toastr.error(response.message);
+                    $('#editUserModal').modal("hide");
+                }
+            });
+        }
+
+        function sendNotification(id){
+            $.ajax({
+                url : "{{ url('api/sendNotification') }}",
+                method : "POST",
+                data : {
+                    id : id
+                }
+            }).done(function(response){
+                if(response.success){
+                    toastr.success(response.message);
+                    $('#pendingRequestsTable').DataTable().ajax.reload();
+                    postedRequestCount();
+                }else{
+                    toastr.error(response.message);
+                }
+            });
+        }
+
+        // end admin
+        
+        // start faculty
+        function requestNotification(){
+            var announcementFaculty = $('#announcementFaculty').val();
+            $.ajax({
+                url : "{{ url('api/requestNotification') }}",
+                method : "POST",
+                data : {
+                    message : announcementFaculty
+                }
+            }).done(function(response){
+                if(response.success){
+                    toastr.info(response.message);
+                }else{
+                    toastr.error(response.message);
+                }
+            });
+        }
+        // end faculty
+
+        // start student
+        function tableStudentsLoad(){
+            tableStudents = $('#tableStudents').DataTable().destroy();
+            tableStudents = $('#tableStudents').DataTable({
+                "ajax": {
+                    url : "{{ url('api/tableStudents') }}",
+                    method : "GET"
+                },
+                "columns": [
+                    {data : "message", name: "message"},
+                    {data : "postedby", name: "postedby"}
+                ]
+            });
+        }
+        // end student
+        
+    </script>
+@endsection
