@@ -88,9 +88,14 @@ class Posts extends Model
         ->table('posts as a')
         ->select(
             'a.message as message',
-            'b.fullname as postedby'
+            'b.fullname as postedby',
+            // 'c.feedback as feedback',
+            DB::raw("IFNULL(c.feedback, 'No Feedback Yet') as feedback"),
+            'b.id as userId',
+            'a.id as postsId'
         )
         ->join('users as b', 'a.users_id', '=', 'b.id')
+        ->leftjoin('feedbacks as c', 'a.id', '=', 'c.posts_id')
         ->where('a.is_posted', 1)
         ->get();
     }
@@ -129,5 +134,39 @@ class Posts extends Model
 
         return "true";
 
+    }
+
+    public static function openFeedBack($data){
+        return $query = DB::connection("mysql")
+        ->table("posts")
+        ->where('id', $data->postId)
+        ->get();
+    }
+
+    public static function saveFeedBack($data){
+        return $query = DB::connection("mysql")
+        ->table("feedbacks")
+        ->insert([
+            "feedback" => $data->myfeedback,
+            "users_id" => $data->userId,
+            "posts_id" => $data->postId,
+            "created_at" => DB::raw("NOW()"),
+            "updated_at" => DB::raw("NOW()")
+        ]);
+    }
+
+    public static function tableFeedback(){
+        return $query = DB::connection("mysql")
+        ->table("posts as a")
+        ->select(
+            'a.message as announcement',
+            DB::raw("IFNULL(b.feedback, 'No Feedback Yet') as feedback"),
+            'c.fullname as fullname',
+            // 'b.created_at as feedback_created'
+            DB::raw("DATE_FORMAT(b.created_at, '%m-%d-%Y %H:%i %p') as feedback_created")
+        )
+        ->join('feedbacks as b', 'a.id', '=', 'b.posts_id')
+        ->join('users as c', 'b.users_id', '=', 'c.id')
+        ->get();
     }
 }

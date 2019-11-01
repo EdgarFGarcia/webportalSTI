@@ -231,4 +231,49 @@ class apiController extends Controller
         }
     }
 
+    public function openFeedBack(Request $request){
+        $query = Posts::openFeedBack($request);
+        if($query){
+            return response()->json([
+                'data' => $query,
+                'success' => true
+            ]);
+        }else{
+            return response()->json([
+                'data' => array(),
+                'success' => false
+            ]);
+        }
+    }
+
+    public function saveFeedBack(Request $request){
+        $query = Posts::saveFeedBack($request);
+        if($query){
+            return response()->json([
+                'data' => $query,
+                'success' => true,
+                'message' => 'Posting your feedback successful!'
+            ]);
+        }else{
+            return response()->json([
+                'data' => array(),
+                'success' => false,
+                'message' => "There's an error"
+            ]);
+        }
+    }
+
+    public function tableFeedback(){
+        $query = Posts::tableFeedback();
+        if($query){
+            return response()->json([
+                'data' => $query
+            ]);
+        }else{
+            return response()->json([
+                'data' => array()
+            ]);
+        }
+    }
+
 }

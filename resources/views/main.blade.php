@@ -64,6 +64,18 @@
                 <textarea id="announcement" class="form-control"></textarea>
                 <button type="button" id="sendAnnouncement" class="btn btn-primary float-right">Send</button>
             </div>
+            <div class="col-md-12">
+                <table class="table table-bordered table-striped" id="tableFeedback">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Announcement</th>
+                            <th>Feedback</th>
+                            <th>Feedback Created At</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
         
         @include('modals.pendingRequestModal')
@@ -92,10 +104,12 @@
                     <tr>
                         <th>Message</th>
                         <th>Posted By</th>
+                        <th>My Feedback</th>
                     </tr>
                 </thead>
             </table>
         </div>
+        @include('modals.feedbackAnnouncement')
     @endif
 @endsection
 
@@ -106,6 +120,9 @@
         var registeredCountTable = $('#registeredCountTable').DataTable();
         var pendingRequestsTable = $('#pendingRequestsTable').DataTable();
         var tableStudents = $('#tableStudents').DataTable();
+        var tableFeedback = $('#tableFeedback').DataTable();
+        var postId;
+        var userId = {{Auth::User()->id}}
 
         $(document).ready(function(){
             // start admin
@@ -113,6 +130,7 @@
             getRegisteredCountNonVerified();
             pendingRequestCount();
             postedRequestCount();
+            tableFeedbackGet();
 
             $(document).on('click', '#pendingRequestsDiv', function(){
                 getPendingRequests();
@@ -148,7 +166,7 @@
                 editUser(id);
             });
 
-
+            
 
             $(document).on('click', '#saveEditUser', function(){
                 saveEditedUser();
@@ -163,10 +181,39 @@
             // end faculty
 
             // start student
+
             tableStudentsLoad();
+
+            $('#tableStudents').on('click', 'tbody tr', function(){
+                var data = tableStudents.row(this).data();
+                postId = data["postsId"];
+                openFeedBack(postId);
+            });
+
+            $(document).on('click', '#saveMyFeedback', function(){
+                saveFeedBack(postId);
+            });
+
             // end student
         });
         // start admin
+
+        function tableFeedbackGet(){
+            tableFeedback = $('#tableFeedback').DataTable().destroy();
+            tableFeedback = $('#tableFeedback').DataTable({
+                "ajax": {
+                    url: "{{ url('api/tableFeedbackGet') }}",
+                    method : "GET"
+                },
+                "columns": [
+                    {"data": "fullname"},
+                    {"data": "announcement"},
+                    {"data": "feedback"},
+                    {"data": "feedback_created"}
+                ]
+            });
+        }
+
         function getRegisteredCount(){
             $.ajax({
                 url : "{{ url('api/getHeadCount') }}",
@@ -382,10 +429,52 @@
                 },
                 "columns": [
                     {data : "message", name: "message"},
-                    {data : "postedby", name: "postedby"}
+                    {data : "postedby", name: "postedby"},
+                    {data : "feedback", name: "feedback"},
                 ]
             });
         }
+
+        function openFeedBack(postId){
+            $('#feedbackAnnouncementM').modal("show");
+            $.ajax({
+                url : "{{ url('api/openFeedBack') }}",
+                method : "POST",
+                data : {
+                    userId : userId,
+                    postId : postId
+                }
+            }).done(function(response){
+                if(response.success){
+                    console.log(response.data);
+                    $('#announcement').val(response.data[0].message);
+                }
+            });
+        }
+
+        function saveFeedBack(postId){
+            // console.log(userId);
+            // console.log(postId);
+            var myfeedback = $('#myfeedback').val();
+
+            $.ajax({
+                url : "{{ url('api/saveFeedBack') }}",
+                method : "POST",
+                data : {
+                    postId : postId,
+                    userId : userId,
+                    myfeedback : myfeedback
+                }
+            }).done(function(response){
+                if(response.success){
+                    toastr.success(response.message);
+                    $('#feedbackAnnouncementM').modal("hide");
+                    $('#tableStudents').DataTable().ajax.reload();
+                }
+            });
+
+        }
+
         // end student
         
     </script>

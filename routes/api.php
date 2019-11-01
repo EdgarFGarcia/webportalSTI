@@ -42,6 +42,7 @@ Route::get("getPendingRequests", "apiController@getPendingRequests");
 // send announcement
 Route::post("sendAnnouncement", "apiController@sendAnnouncement");
 Route::post("requestNotification", "apiController@requestNotification");
+Route::get("tableFeedbackGet", "apiController@tableFeedback");
 
 // verify user
 Route::get("registerdUserNotVerified", "apiController@registerdUserNotVerified");
@@ -51,3 +52,5 @@ Route::post("saveEditedUser", "apiController@saveEditedUser");
 
 // student notification
 Route::get("tableStudents", "apiController@tableStudents");
+Route::post("openFeedBack", "apiController@openFeedBack");
+Route::post("saveFeedBack", "apiController@saveFeedBack");
