@@ -504,7 +504,7 @@
             // TODO
             $.ajax({
                 url : "{{ url('api/editUser') }}",
-                method : "GET",
+                method : "POST",
                 dataType : "JSON",
                 data : {
                     id : userId

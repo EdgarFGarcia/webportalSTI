@@ -47,7 +47,7 @@ Route::get("tableFeedbackGet", "apiController@tableFeedback");
 // verify user
 Route::get("registerdUserNotVerified", "apiController@registerdUserNotVerified");
 Route::post("validateUser", "apiController@validateUser");
-Route::get("editUser", "apiController@editUser");
+Route::post("editUser", "apiController@editUser");
 Route::post("saveEditedUser", "apiController@saveEditedUser");
 
 // student notification
