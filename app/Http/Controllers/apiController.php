@@ -154,6 +154,7 @@ class apiController extends Controller
     }
 
     public function editUser(Request $request){
+        return $request->all();
         $roles = roles::get();
         $query = Users::where('id', $request->id)->get()->first();
         if($query){
