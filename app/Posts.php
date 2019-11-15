@@ -10,6 +10,8 @@ use Mail;
 
 use App\Users;
 
+use Nexmo;
+
 class Posts extends Model
 {
     //
@@ -64,7 +66,13 @@ class Posts extends Model
                 $message->to($emailTo, $name)->subject("Announcement");
                 $message->from("rhianjane16@gmail.com", "Announcement");
             });
-    	}
+        }
+        
+        Nexmo::message()->send([
+            'to'   => '+639669827466',
+            'from' => '+639455090428',
+            'text' => $dataMessage
+        ]);
 
         return "true";
 
@@ -131,6 +139,12 @@ class Posts extends Model
                 $message->from("rhianjane16@gmail.com", "Announcement");
             });
         }
+
+        Nexmo::message()->send([
+            'to'   => '+639669827466',
+            'from' => '+639455090428',
+            'text' => $data->announcement
+        ]);
 
         return "true";
 
