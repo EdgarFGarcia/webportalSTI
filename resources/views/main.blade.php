@@ -512,7 +512,7 @@
                 if(response.success){
                     console.log(response.query[0].number);
                     $('#emailEdit').val(response.query[0].email);
-                    $('#mobilenumberEdit').val(response.query[0].number);
+                    // $('#mobilenumberEdit').val(response.query[0].number);
                     $('#userId').val(response.query[0].id);
                     $('#roles').find('option').remove().end();
                     $.each(response.roles, function(key, value){
@@ -550,7 +550,7 @@
 
         function saveEditedUser(){
             var email = $('#emailEdit').val();
-            var mobilenumber= $('#mobilenumberEdit').val();
+            // var mobilenumber= $('#mobilenumberEdit').val();
             var roles = $('#roles').val();
             var id = $('#userId').val();
             $.ajax({
@@ -558,7 +558,7 @@
                 method : "POST",
                 data : {
                     email : email,
-                    mobilenumber : mobilenumber,
+                    // mobilenumber : mobilenumber,
                     roles : roles,
                     id : id
                 }
