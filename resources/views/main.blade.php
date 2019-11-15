@@ -510,9 +510,9 @@
                 }
             }).done(function(response){
                 if(response.success){
-                    toastr.success("Please wait...");
-                    $('#email').val(response.query[0].email);
-                    $('#mobilenumber').val(response.query[0].number);
+                    console.log(response.query[0].number);
+                    $('#emailEdit').val(response.query[0].email);
+                    $('#mobilenumberEdit').val(response.query[0].number);
                     $('#userId').val(response.query[0].id);
                     $('#roles').find('option').remove().end();
                     $.each(response.roles, function(key, value){
@@ -549,8 +549,8 @@
         }
 
         function saveEditedUser(){
-            var email = $('#email').val();
-            var mobilenumber= $('#mobilenumber').val();
+            var email = $('#emailEdit').val();
+            var mobilenumber= $('#mobilenumberEdit').val();
             var roles = $('#roles').val();
             var id = $('#userId').val();
             $.ajax({
