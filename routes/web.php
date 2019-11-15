@@ -22,6 +22,7 @@ Route::group(['middleware' => ['preventbackhistory']], function () {
         Route::get('main', 'pageController@index');
         Route::get('verifyhome', 'pageController@verifyhome');
         Route::get('announcement', 'pageController@announcement');
+        Route::get('messages', 'pageController@messages');
     });
 
 });

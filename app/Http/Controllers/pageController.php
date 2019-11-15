@@ -23,4 +23,8 @@ class pageController extends Controller
     public function announcement(){
         return view('announcement');
     }
+
+    public function messages(){
+        return view('message');
+    }
 }

@@ -9,6 +9,9 @@ use Validator;
 use App\Users;
 use App\Posts;
 use App\roles;
+use App\Messages;
+
+use DB;
 
 class apiController extends Controller
 {
@@ -274,6 +277,200 @@ class apiController extends Controller
                 'data' => array()
             ]);
         }
+    }
+
+    public function sendMessagePTP(Request $request){
+        $query =  Messages::createMessage($request);
+        if($query){
+            return response()->json([
+                'success' => true,
+                'message' => "Sending Message Successful"
+            ]);
+        }else{
+            return response()->json([
+                'success' => false,
+                'message' => "There's an error!"
+            ]);
+        }
+    }
+
+    public function loadMyMessages(){
+        $query = Messages::loadMyMessages();
+
+        $content = "";
+
+        foreach($query as $out){
+            $content .= "
+                <div class='card' style='border:1px solid black;' id='cardClick'>
+                    <div class='card-body'>
+                    <input type='hidden' id='toId' value='".$out->toId."'/>
+                    For: $out->for
+                    </div>
+                </div>
+            ";
+        }
+
+        return response()->json([
+
+            'content' => $content,
+            'success' => true
+
+        ]);
+
+    }
+
+    public function openMessages(Request $request){
+        $query = Messages::openMessages($request);
+
+        $contents = "";
+
+        foreach($query as $out){
+            $contents .= "
+                <label>Sent By: $out->from</label><br/>
+                <label>For: $out->to</label><br/>
+                <h3>Message: $out->message</h3><br/>
+                <small>Date Sent: $out->datetime</small>
+                <hr style='border: 1px solid black;'/>
+            ";
+        }
+
+        return response()->json([
+
+            'success' => true,
+            'contents' => $contents
+
+        ]);
+
+    }
+
+    public function loadMessageForMe(){
+        $query = Messages::loadMessageForMe();
+
+        $contents = "";
+
+        foreach($query as $out){
+            $contents .= "
+                <div class='card' style='border:1px solid black;' id='cardClickFor'>
+                    <div class='card-body'>
+                    <input type='hidden' id='fromId' value='".$out->fromId."'/>
+                    From: $out->from
+                    </div>
+                </div>
+            ";
+        }
+
+        return response()->json([
+            'success' => true,
+            'content' => $contents
+        ]);
+    }
+
+    public function openMessagesForMe(Request $request){
+        $query = Messages::openMessagesForMe($request);
+
+        $contents = "";
+
+        foreach($query as $out){
+            $contents .= "
+                <label>Sent By: $out->from</label><br/>
+                <label>For: $out->to</label><br/>
+                <h3>Message: $out->message</h3><br/>
+                <small>Date Sent: $out->datetime</small>
+                <hr style='border: 1px solid black;'/>
+            ";
+        }
+
+        return response()->json([
+
+            'success' => true,
+            'contents' => $contents
+
+        ]);
+
+    }
+
+    function tableUsersAllStudentGet(){
+        $query = Users::get();
+
+        if($query){
+            return response()->json([
+                'data' => $query
+            ]);
+        }else{
+            return response()->json([
+                'data' => array()
+            ]);
+        }
+    }
+
+    function sendMessageMain(Request $request){
+        $query = Messages::createMessage($request);
+        if($query){
+            return response()->json([
+                'success' => true,
+                'message' => "Successfully sent message"
+            ]);
+        }else{
+            return response()->json([
+
+                'success' => false,
+                'message' => "There's an error sending your message!"
+
+            ]);
+        }
+    }
+
+    function tableStudentsForGradesF(){
+        $query = Users::get();
+
+        if($query){
+            return response()->json([
+                'data' => $query
+            ]);
+        }else{
+            return response()->json([
+                'data' => array()
+            ]);
+        }
+    }
+
+    function sendGrade(Request $request){
+        $query = DB::connection('mysql')
+        ->table('grades')
+        ->insert([
+            'grade' => $request->sendGradeText,
+            'grade_for' => $request->userIdGrade,
+            'graded_by' => $request->fromId,
+            'created_at' => DB::raw("NOW()")
+        ]);
+        if($query){
+            return response()->json([
+                'success' => true,
+                'message' => "Sending Grade Successful"
+            ]);
+        }else{
+            return response()->json([
+                'success' => false,
+                'message' => "There's an error send"
+            ]);
+        }
+    }
+
+    function getMyGrades(){
+        $query = DB::connection('mysql')
+        ->table('grades as a')
+        ->select(
+            'b.fullname as gradedBy',
+            'a.grade as grade'
+        )
+        ->join('users as b', 'a.graded_by', '=', 'b.id')
+        ->where('a.grade_for', '=', Auth::User()->id)
+        ->get();
+
+        return response()->json([
+            'data' => $query,
+        ]);
+
     }
 
 }

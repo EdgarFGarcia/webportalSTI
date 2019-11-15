@@ -19,6 +19,12 @@
     <span>Dashboard</span></a>
 </li>
 
+<li class="nav-item active">
+  <a class="nav-link" href="{{ url('/messages') }}">
+    <i class="fas fa-envelope"></i>
+    <span>Messages</span></a>
+</li>
+
 <!-- Divider -->
 <!-- <hr class="sidebar-divider"> -->
 

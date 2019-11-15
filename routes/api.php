@@ -54,3 +54,18 @@ Route::post("saveEditedUser", "apiController@saveEditedUser");
 Route::get("tableStudents", "apiController@tableStudents");
 Route::post("openFeedBack", "apiController@openFeedBack");
 Route::post("saveFeedBack", "apiController@saveFeedBack");
+Route::get('tableUsersAllStudentGet', 'apiController@tableUsersAllStudentGet');
+Route::post('sendMessageMain', 'apiController@sendMessageMain');
+
+Route::post('sendMessagePTP', 'apiController@sendMessagePTP');
+
+Route::get('loadMyMessages', 'apiController@loadMyMessages');
+Route::post('openMessages', 'apiController@openMessages');
+Route::get("loadMessageForMe", 'apiController@loadMessageForMe');
+Route::post('openMessagesForMe', 'apiController@openMessagesForMe');
+
+Route::get('tableStudentsForGradesF', 'apiController@tableStudentsForGradesF');
+
+Route::post('sendGrade', 'apiController@sendGrade');
+
+Route::get('getMyGrades', 'apiController@getMyGrades');

@@ -13,6 +13,7 @@
         <div class="modal-body">
             <div class="col-md-12">
                 <input type="hidden" id="userId"/>
+                <input type="hidden" id="fromId" value="{{ Auth::User()->id }}"/>
                 <div class="form-group row">
                     <div class="col-sm-6 mb-3 mb-sm-0">
                         <label for="email">Email</label>
@@ -27,6 +28,20 @@
                     <div class="col-sm-12 mb-sm-0">
                         <label for="roles">Roles</label>
                         <select name="roles" id="roles" class="form-control"></select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12 mb-sm-0">
+                        <label>Send Message</label>
+                        <textarea class="form-control" id="sendMessage"></textarea>
+                    </div>
+                    <div class="col-md-12 row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4" class="float-right">
+                            <button type="button" class="btn btn-primary" id="sendMessageBtn">Send Message</button>
+                            <button type="button" class="btn btn-primary" id="clearMessageBtn">Clear</button>
+                        </div>
                     </div>
                 </div>
             </div>

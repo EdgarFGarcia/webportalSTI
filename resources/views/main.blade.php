@@ -93,12 +93,36 @@
             <textarea id="announcementFaculty" class="form-control"></textarea>
             <button type="button" id="sendAnnouncementFaculty" class="btn btn-primary float-right">Send</button>
         </div>
+        <br/><br/><br/>
+        <div class="col-md-12">
+            <label>Send Message</label>
+            <table class="table table-sm table-condensed table-stripped" id="tableUsersAllStudent">
+            <thead>
+                    <tr>
+                        <th>Fullname</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <br/><br/><br/>
+        <div class="col-md-12">
+            <label>Send Grades To Student</label>
+            <table class="table table-sm table-condensed table-stripped" id="tableStudentsForGrades">
+            <thead>
+                    <tr>
+                        <th>Fullname</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
     <!-- student -->
     @elseif(Auth::User()->roles_id == 3)
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Dashboard Students</h1>
         </div>
+        <br/><br/><br/>
         <div class="col-md-12">
+            <label>Send Message</label>
             <table class="table table-sm table-condensed table-striped" id="tableStudents">
                 <thead>
                     <tr>
@@ -109,10 +133,32 @@
                 </thead>
             </table>
         </div>
+        <br/><br/><br/>
+        <div class="col-md-12">
+            <table class="table table-sm table-condensed table-stripped" id="tableUsersAllStudent">
+            <thead>
+                    <tr>
+                        <th>Fullname</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <br/><br/><br/>
+        <div class="col-md-12">
+            <table class="table table-sm table-condensed table-stripped" id="myGrades">
+            <thead>
+                    <tr>
+                        <th>My Grade</th>
+                        <th>Graded By</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
         @include('modals.feedbackAnnouncement')
     @endif
 @endsection
-
+@include('modals.sendMessageModal')
+@include('modals.sendGradeModal')
 @section('script')
     <script>
 
@@ -121,6 +167,9 @@
         var pendingRequestsTable = $('#pendingRequestsTable').DataTable();
         var tableStudents = $('#tableStudents').DataTable();
         var tableFeedback = $('#tableFeedback').DataTable();
+        var tableUsersAllStudent = $('#tableUsersAllStudent').DataTable();
+        var tableStudentsForGrades = $('#tableStudentsForGrades').DataTable();
+        var myGrades = $('#myGrades').DataTable();
         var postId;
         var userId = {{Auth::User()->id}}
 
@@ -131,6 +180,9 @@
             pendingRequestCount();
             postedRequestCount();
             tableFeedbackGet();
+            tableUsersAllStudentGet();
+            tableStudentsForGradesGet();
+            myGradesGet();
 
             $(document).on('click', '#pendingRequestsDiv', function(){
                 getPendingRequests();
@@ -146,6 +198,18 @@
 
             $(document).on('click', '#registeredCount', function(){
                 registeredCountTableCallBack();
+            });
+            
+            $('#tableStudentsForGrades tbody').on('click', 'tr', function(){
+                var data = tableStudentsForGrades.row(this).data();
+                var id = data['id'];
+                openSendGradeModal(id);
+            });
+
+            $('#tableUsersAllStudent tbody').on('click', 'tr', function(){
+                var data = tableUsersAllStudent.row(this).data();
+                var id = data['id'];
+                openSendMessageModal(id);
             });
 
             $('#registerdUserNotVerifiedTable tbody').on('click', 'tr', function(){
@@ -165,12 +229,15 @@
                 var id = data['userId'];
                 editUser(id);
             });
-
             
 
             $(document).on('click', '#saveEditUser', function(){
                 saveEditedUser();
             });
+
+            $(document).on('click', '#sendMessageBtn', function(){
+                sendMessageFunction();
+            })
 
             // end admin
 
@@ -194,9 +261,113 @@
                 saveFeedBack(postId);
             });
 
+            $(document).on('click', '#sendMessageMainBtn', function(){
+                sendMessageTo();
+            });
+
+            $(document).on('click', '#sendGradeBtn', function(){
+                sendGrade();
+            });
+
             // end student
         });
         // start admin
+
+        function myGradesGet(){
+            myGrades = $('#myGrades').DataTable().destroy();
+            myGrades = $('#myGrades').DataTable({
+                "ajax": {
+                    url : "{{ url('api/getMyGrades') }}",
+                    method : "GET"
+                },
+                "columns": [
+                    {"data": "grade"},
+                    {"data": "gradedBy"}
+                ]
+            });
+        }
+
+        function tableStudentsForGradesGet(){
+            tableStudentsForGrades = $('#tableStudentsForGrades').DataTable().destroy();
+            tableStudentsForGrades = $('#tableStudentsForGrades').DataTable({
+                "ajax": {
+                    url : "{{ url('api/tableStudentsForGradesF') }}",
+                    method : "GET"
+                },
+                "columns": [
+                    {"data": "fullname"}
+                ]
+            });
+        }
+
+        function openSendGradeModal(id){
+            $('#sendGradeModal').modal('show');
+            $('#userIdGrade').val(id);
+        }
+
+        function sendGrade(){
+            var userIdGrade = $('#userIdGrade').val();
+            var fromId = $('#fromId').val();
+            var sendGradeText = $('#sendGradeText').val();
+            $.ajax({
+                url : "{{ url('api/sendGrade') }}",
+                method : "POST",
+                data : {
+                    userIdGrade : userIdGrade,
+                    fromId : fromId,
+                    sendGradeText : sendGradeText
+                }
+            }).done(function(response){
+                if(response.success){
+                    toastr.success(response.message);
+                    $('#sendGradeModal').modal('hide');
+                }else{
+                    toastr.error(response.message);
+                }
+            });
+        }
+
+        function tableUsersAllStudentGet(){
+            tableUsersAllStudent = $('#tableUsersAllStudent').DataTable().destroy();
+            tableUsersAllStudent = $('#tableUsersAllStudent').DataTable({
+                "ajax": {
+                    url: "{{ url('api/tableUsersAllStudentGet') }}",
+                    method: "GET"
+                },
+                "columns" : [
+                    {"data": "fullname"}
+                ]
+            });
+        }
+
+        function openSendMessageModal(id){
+            $('#userId').val(id);
+            $('#sendMessageModal').modal("toggle");
+        }
+
+        function sendMessageTo(){
+            var userId = $('#userId').val();
+            var fromId = $('#fromId').val();
+            var sendMessageMain = $('#sendMessageMain').val();
+            
+            $.ajax({
+                url : "{{ url('api/sendMessageMain') }}",
+                method : "POST",
+                data : {
+                    userId : userId,
+                    fromId : fromId,
+                    message : sendMessageMain
+                }
+            }).done(function(response){
+                if(response.success){
+                    $('#sendMessageModal').modal("toggle");
+                    toastr.success(response.message);
+                }else{
+                    toastr.error(response.message);
+                }
+            });
+
+        }
 
         function tableFeedbackGet(){
             tableFeedback = $('#tableFeedback').DataTable().destroy();
@@ -351,6 +522,28 @@
                             );
                     });
                     $('#editUserModal').modal("show");
+                }
+            });
+        }
+
+        function sendMessageFunction(){
+            var sendMessage = $('#sendMessage').val();
+            var userId = $('#userId').val();
+            var fromId = $('#fromId').val();
+            $.ajax({
+                url : "{{ url('api/sendMessagePTP') }}",
+                method : "POST",
+                data : {
+                    message : sendMessage,
+                    userId : userId,
+                    fromId : fromId
+                }
+            }).done(function(response){
+                if(response.success){
+                    toastr.success(response.message);
+                    $('#editUserModal').modal("hide");
+                }else{
+                    toastr.error(response.message);
                 }
             });
         }
