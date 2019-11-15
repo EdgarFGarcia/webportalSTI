@@ -19,10 +19,10 @@
                         <label for="emailEdit">Email</label>
                         <input type="email" class="form-control form-contol-user" id="emailEdit">
                     </div>
-                    <!-- <div class="col-sm-6 mb-3 mb-sm-0">
+                    <div class="col-sm-6 mb-3 mb-sm-0">
                         <label for="mobilenumberEdit">Mobile Number</label>
                         <input type="text" class="form-control form-contol-user" id="mobilenumberEdit">
-                    </div> -->
+                    </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-sm-12 mb-sm-0">

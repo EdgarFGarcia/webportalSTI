@@ -510,10 +510,10 @@
                 }
             }).done(function(response){
                 if(response.success){
-                    console.log(response.query[0].number);
-                    $('#emailEdit').val(response.query[0].email);
-                    // $('#mobilenumberEdit').val(response.query[0].number);
-                    $('#userId').val(response.query[0].id);
+                    console.log(response.query.number);
+                    $('#emailEdit').val(response.query.email);
+                    $('#mobilenumberEdit').val(response.query.number);
+                    $('#userId').val(response.query.id);
                     $('#roles').find('option').remove().end();
                     $.each(response.roles, function(key, value){
                         $('#roles').append($("<option></option")

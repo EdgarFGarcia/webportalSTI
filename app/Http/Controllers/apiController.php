@@ -155,7 +155,7 @@ class apiController extends Controller
 
     public function editUser(Request $request){
         $roles = roles::get();
-        $query = Users::where('id', $request->id)->get();
+        $query = Users::where('id', $request->id)->get()->first();
         if($query){
             return response()->json([
                 'success' => true,
